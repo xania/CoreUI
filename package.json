@@ -1,0 +1,52 @@
+{
+  "name": "xania.coreui",
+  "version": "1.0.0",
+  "description": "Xania CoreUI",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "restore": "jspm install",
+    "build": "tsc --p tsconfig.json",
+    "bundle-vendor": "jspm bundle vendor wwwroot\\bundles\\vendor-bundle.js --minify",
+    "bundle-app": "jspm bundle app - vendor wwwroot\\bundles\\app-bundle.js --minify",
+    "depcache": "jspm depcache app",
+    "lessc": "lessc wwwroot\\css\\xania.less wwwroot\\css\\xania.min.css"
+  },
+  "author": "Ibrahim",
+  "license": "MIT",
+  "dependencies": {
+    "@coreui/coreui": "^2.0.2",
+    "@types/react": "^16.4.6",
+    "@types/react-dom": "^16.0.6"
+  },
+  "devDependencies": {
+    "chalk": "^2.4.1",
+    "indent-string": "^3.2.0",
+    "jquery": "^3.3.1",
+    "jspm": "^0.16.53",
+    "less": "^3.0.4",
+    "perfect-scrollbar": "^1.3.0",
+    "popper": "^1.0.1",
+    "popper.js": "^1.14.3",
+    "source-map": "^0.7.3",
+    "typescript": "^2.9.2"
+  },
+  "jspm": {
+    "directories": {
+      "baseURL": "wwwroot"
+    },
+    "dependencies": {
+      "@aspnet/signalr": "npm:@aspnet/signalr@^1.0.2",
+      "@coreui/coreui": "npm:@coreui/coreui@^2.0.2",
+      "@coreui/icons": "npm:@coreui/icons@^0.3.0",
+      "jquery": "npm:jquery@^3.3.1",
+      "react": "npm:react@^16.4.1",
+      "react-dom": "npm:react-dom@^16.4.1",
+      "rxjs": "npm:rxjs@^6.2.1",
+      "tslib": "npm:tslib@^1.9.3"
+    },
+    "devDependencies": {
+      "typescript": "npm:typescript@^2.0.7"
+    }
+  }
+}

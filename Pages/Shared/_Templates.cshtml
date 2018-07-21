@@ -1,0 +1,37 @@
+<template id="section-template">
+    <section>
+        <div class="panel flex-columns-container">
+            <div class="flex-rows-container">
+                <a href="~/" class="btn btn-pill btn-secondary"><span class="cui-contrast"></span> Terug</a>
+                <div style="flex-grow: 1"></div>
+            </div>
+            <div style="flex-grow: 1;">
+                <div style="padding: 20px 0;">
+                    <input type="text" class="form-control" placeholder="Zoek..."/>
+                </div>
+                <table class="table">
+                    <thead class="thead-light">
+                    <tr>
+                        <th scope="col">Debiteur code</th>
+                        <th scope="col">Debiteur naam</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>Debiteur 01</td>
+                        <td>X.0</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex-rows-container">
+                <a href="~/orders" class="btn btn-square btn-outline-info" style="flex-grow: 1;height: 40px;">
+                    <span class="cui-cart"></span> Orders
+                </a>
+                <a href="~/overview" class="btn btn-square btn-outline-success" style="flex-grow: 1;height: 40px;">
+                    <span class="cui-lightbulb"></span> Overzicht
+                </a>
+            </div>
+        </div>
+    </section>
+</template>

@@ -1,0 +1,24 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "lib": [ "es2018", "dom" ],
+    "noImplicitAny": false,
+    "noEmitOnError": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "target": "es5",
+    "jsx": "react",
+    "baseUrl": "",
+    "paths": {
+      "rxjs": [ "wwwroot/jspm_packages/npm/rxjs@6.2.1" ],
+      "rxjs/*": [ "wwwroot/jspm_packages/npm/rxjs@6.2.1/*" ],
+      "@aspnet/signalr": [ "wwwroot/jspm_packages/npm/@aspnet/signalr@1.0.2" ]
+    }
+  },
+  "include": [
+    "wwwroot/app.ts",
+    "wwwroot/vendor.ts",
+    "wwwroot/src/**/*.ts",
+    "wwwroot/**/*.tsx"
+  ]
+}
