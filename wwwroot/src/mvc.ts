@@ -6,9 +6,10 @@ import { isPromise } from 'rxjs/internal/util/isPromise';
 import { isInteropObservable } from 'rxjs/internal/util/isInteropObservable';
 import { fromPromise } from 'rxjs/internal/observable/fromPromise';
 import { fromObservable } from 'rxjs/internal/observable/fromObservable';
+import * as views from "./shared/views"
 
 export function notFound(path: string) {
-    return new NotFoundResult(path);
+    return views.message("not found: " + path);
 }
 
 declare type View = JSX.Element;
@@ -61,7 +62,7 @@ class Routes {
     resolve(path: string): IAction {
         var result = this.map.get(path);
         if (result === void 0 || result === null)
-            console.error("not found", path);
+            return new RouteAction(() => notFound(path));
         return result;
     }
 }
@@ -71,23 +72,8 @@ interface IAction {
 }
 
 export interface IActionResult {
-    routes?: Routes;
+    partial(path: string): IAction;
     render(context?: IActionContext): RenderResult;
-}
-
-class NotFoundResult implements IActionResult {
-    constructor(public path: string) { }
-
-    render(context?: IActionContext): RenderResult {
-        console.error("not found", this.path);
-        return null;
-    }
-
-    routes: Routes;
-
-    toString() {
-        return `notFound [${this.path}]`;
-    }
 }
 
 function valueToObservable<T>(input: Value<T>): Rx.Observable<T> {
@@ -122,6 +108,11 @@ abstract class ActionResultBase implements IActionResult {
         this.routes.set(path, a);
         return this;
     }
+
+    partial(path: string): IAction {
+        return this.routes.resolve(path);
+    }
+
     abstract render(context?: IActionContext): RenderResult;
 }
 
@@ -172,6 +163,9 @@ class RouteAction implements IAction {
 const emptyResult: IActionResult = {
     render(): RenderResult {
         return new RenderResult(null, this);
+    }, 
+    partial() {
+        return null;
     }
 }
 class RouteCache {
@@ -217,7 +211,7 @@ const executeAction: (action: IAction) => Rx.Observable<IActionResult>
     };
 
 function resolveAction(ar: IActionResult, path: string) {
-    return ar && ar.routes && ar.routes.resolve(path);
+    return ar && ar.partial(path);
 }
 
 class CacheEntry {
@@ -234,7 +228,7 @@ export class Router {
         this.active$ = new Rx.Subject<string>();
         this.actions$ = Rx.merge(passive$, this.active$).pipe(
             distinctUntilChanged(),
-            map((pathname: string) => pathname.split("/").filter(x => !!x)),
+            map((pathname: string) => pathname ? pathname.split("/").filter(x => !!x) : []),
         );
         this.start();
     }
