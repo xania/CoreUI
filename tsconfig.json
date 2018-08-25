@@ -12,7 +12,9 @@
     "paths": {
       "rxjs": [ "wwwroot/jspm_packages/npm/rxjs@6.2.1" ],
       "rxjs/*": [ "wwwroot/jspm_packages/npm/rxjs@6.2.1/*" ],
-      "@aspnet/signalr": [ "wwwroot/jspm_packages/npm/@aspnet/signalr@1.0.2" ]
+      "@aspnet/signalr": [ "wwwroot/jspm_packages/npm/@aspnet/signalr@1.0.2" ],
+      //"toastr": [ "wwwroot/jspm_packages/github/CodeSeven/toastr@2.1.4" ],
+      "izitoast": [ "wwwroot/jspm_packages/npm/izitoast@1.4.0" ]
     }
   },
   "include": [

@@ -6,32 +6,20 @@ import { isPromise } from 'rxjs/internal/util/isPromise';
 import { isInteropObservable } from 'rxjs/internal/util/isInteropObservable';
 import { fromPromise } from 'rxjs/internal/observable/fromPromise';
 import { fromObservable } from 'rxjs/internal/observable/fromObservable';
-import * as views from "./shared/views"
+import { IziToast } from "izitoast"
+import * as iziT from "izitoast"    
+const iziToast = <IziToast><any>iziT;
 
-export function notFound(path: string) {
-    return views.message("not found: " + path);
+function notFound(path: string) {
+    return new NotFoundResult(path);
 }
 
 declare type View = JSX.Element;
-declare type RoutePath = string | ((str: string) => any) | RegExp;
-declare type Disposable = IDisposable | PromiseLike<IDisposable> | null;
 declare type Value<T> = T | Rx.Observable<T> | Rx.InteropObservable<T> | PromiseLike<T>;
-declare type ActionResult = IActionResult | Value<View>;
-declare type ActionFunc = ((context?: IActionContext) => ActionResult);
+declare type ActionFunc = ((context?: IActionContext) => IActionResult | Value<View>);
 
 interface IActionContext {
     container: Element
-}
-
-function dataReady<T, U>(data: T | PromiseLike<T>, resolve: (x: T) => U): U | PromiseLike<U> {
-    if (typeof data === "undefined" || data === null)
-        return void 0;
-
-    var promise = data as PromiseLike<T>;
-    if (promise && promise.then)
-        return promise.then(resolve);
-
-    return resolve(data as T);
 }
 
 function scan<T, U>(list: T[], fn: (t: U, x: T, idx?: number) => U, acc: U) {
@@ -73,7 +61,7 @@ interface IAction {
 
 export interface IActionResult {
     partial(path: string): IAction;
-    render(context?: IActionContext): RenderResult;
+    render(context?: IActionContext): RenderResult | void;
 }
 
 function valueToObservable<T>(input: Value<T>): Rx.Observable<T> {
@@ -98,7 +86,7 @@ function isActionResult(action): action is IActionResult {
 }
 abstract class ActionResultBase implements IActionResult {
     routes: Routes = new Routes();
-    route(path: string, action: IAction | ActionFunc | ActionResult): this {
+    route(path: string, action: IAction | ActionFunc | IActionResult): this {
         var a =
             isAction(action)
                 ? action
@@ -142,7 +130,7 @@ export class ReactViewResult extends ActionResultBase {
 }
 
 class RouteAction implements IAction {
-    constructor(public action: ActionFunc | ActionResult) {
+    constructor(public action: ActionFunc | IActionResult) {
     }
 
     execute(context?: IActionContext): IActionResult {
@@ -168,6 +156,22 @@ const emptyResult: IActionResult = {
         return null;
     }
 }
+class NotFoundResult implements IActionResult {
+
+    constructor(public path: string) { }
+
+    partial(path: string): IAction {
+        return new RouteAction(() => new NotFoundResult(this.path + "/" + path));
+    }
+
+    render(context?: IActionContext) {
+        iziToast.error({
+            message: "path not found: " + this.path
+        });
+        // toastr.error("path not found: "+ this.path);
+    }
+}
+
 class RouteCache {
     private path$: Rx.Subject<string> = new Rx.Subject();
     private pathResults$: Rx.Observable<RouteCache>;
@@ -251,7 +255,11 @@ export class Router {
 
             disposeAt(idx);
             return executeAction(resolveAction(actionResult, path))
-                .pipe(tap(r => cache[idx] = new CacheEntry(path, r, r.render({ container }))));
+                .pipe(tap(r => {
+                    var result = r.render({ container });
+                    if (result instanceof RenderResult)
+                        cache[idx] = new CacheEntry(path, r, result);
+                }));
         }
 
         valueToObservable(this.root).pipe(
