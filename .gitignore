@@ -6,8 +6,11 @@
 *.user
 *.userosscache
 *.sln.docstates
+wwwroot/**/*.map
 wwwroot/**/*.js
 wwwroot/**/*.css
+!wwwroot/config.js
+
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -262,5 +265,4 @@ paket-files/
 __pycache__/
 *.pyc
 /wwwroot/bundles
-/wwwroot/jspm_packages
-/wwwroot/src/mvc.js.map
+/wwwroot/jspm_packages/
