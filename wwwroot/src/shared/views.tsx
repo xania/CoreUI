@@ -7,6 +7,18 @@ export function message(text: string) {
     );
 }
 
+export function intro() {
+    return (
+        <div className="flex-columns-container">
+            intro
+            <a href="/log">log</a>
+            <a href="/test/ff">test ff</a>
+            <a href="/test/dd">test dd</a>
+            <a href="/test/dd/gg">test dd gg</a>
+        </div>
+    );
+}
+
 export function sample() {
     return (
         <React.Fragment>

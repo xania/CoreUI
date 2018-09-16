@@ -56,3 +56,7 @@ export function searchSection<T>(title: string, getData: (term: string) => Promi
         map(dataView => section(title, search(input$), dataView, <div>hello</div>))
     );
 }
+
+export function modal(title: string, body: JSX.Element): Rx.Observable<JSX.Element> {
+    return Rx.of(<div>test</div>);
+}

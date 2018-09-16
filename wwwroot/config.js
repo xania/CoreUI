@@ -19,10 +19,6 @@ System.config({
     "rxjs": "npm:rxjs@6.2.1",
     "tslib": "npm:tslib@1.9.3",
     "typescript": "npm:typescript@2.9.2",
-    "github:CodeSeven/toastr@2.1.4": {
-      "css": "github:systemjs/plugin-css@0.1.37",
-      "jquery": "npm:jquery@3.3.1"
-    },
     "github:jspm/nodelibs-assert@0.1.0": {
       "assert": "npm:assert@1.4.1"
     },

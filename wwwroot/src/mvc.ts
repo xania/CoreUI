@@ -1,39 +1,22 @@
 ﻿import * as Rx from "rxjs";
-import { map, switchMap, distinctUntilChanged, tap, shareReplay, throttleTime, scan as scn, mergeScan, mergeMap } from "rxjs/operators";
-import * as Ops from "rxjs/operators";
+import * as Ro from "rxjs/operators";
 import * as ReactDOM from "react-dom"
 import { isPromise } from 'rxjs/internal/util/isPromise';
 import { isInteropObservable } from 'rxjs/internal/util/isInteropObservable';
 import { fromPromise } from 'rxjs/internal/observable/fromPromise';
 import { fromObservable } from 'rxjs/internal/observable/fromObservable';
-import { IziToast } from "izitoast"
-import * as iziT from "izitoast"    
-const iziToast = <IziToast><any>iziT;
+import toast from "./diagnostics/toast"
 
-function notFound(path: string) {
-    return new NotFoundResult(path);
-}
+import * as layout from "./shared/layout"
+import * as logger from "./diagnostics/logger"
 
 declare type View = JSX.Element;
 declare type Value<T> = T | Rx.Observable<T> | Rx.InteropObservable<T> | PromiseLike<T>;
-declare type ActionFunc = ((context?: IActionContext) => IActionResult | Value<View>);
+declare type ActionFunc = ((context?: IActionContext) => IActionResult | Value<View> | void);
 
-interface IActionContext {
-    container: Element
-}
-
-function scan<T, U>(list: T[], fn: (t: U, x: T, idx?: number) => U, acc: U) {
-    console.debug("scan", arguments);
-    let idx = 0;
-    const len = list.length;
-    const result: U[] = [];
-    while (idx < len) {
-        var next = fn(acc, list[idx], idx);
-        result.push(next);
-        acc = next;
-        idx++;
-    }
-    return result;
+export interface IActionContext {
+    container: Element;
+    router: Router;
 }
 
 export interface IDisposable {
@@ -47,11 +30,18 @@ class Routes {
         this.map.set(path, action);
     }
 
-    resolve(path: string): IAction {
-        var result = this.map.get(path);
-        if (result === void 0 || result === null)
-            return new RouteAction(() => notFound(path));
-        return result;
+    resolve(pathname: string): ActionResolution | null {
+        var match = /^\/([^\/]+)/.exec(pathname);
+
+        if (match) {
+            let path = match[1];
+            var action = this.map.get(path);
+            if (action === void 0 || action === null)
+                return null;
+            return { action, path: `/${path}` };
+        }
+
+        return null;
     }
 }
 
@@ -59,9 +49,12 @@ interface IAction {
     execute(context?: IActionContext): Value<IActionResult>;
 }
 
+type ActionResolution = { action: IAction, path: string };
+
 export interface IActionResult {
-    partial(path: string): IAction;
+    partial?(path: string): IAction;
     render(context?: IActionContext): RenderResult | void;
+    routes: Routes;
 }
 
 function valueToObservable<T>(input: Value<T>): Rx.Observable<T> {
@@ -87,18 +80,12 @@ function isActionResult(action): action is IActionResult {
 abstract class ActionResultBase implements IActionResult {
     routes: Routes = new Routes();
     route(path: string, action: IAction | ActionFunc | IActionResult): this {
-        var a =
-            isAction(action)
-                ? action
-                : typeof (action) === "function"
-                ? new RouteAction(action)
-                : new RouteAction(() => action);
-        this.routes.set(path, a);
+        this.routes.set(path, RouteAction.create(action));
         return this;
     }
 
     partial(path: string): IAction {
-        return this.routes.resolve(path);
+        return this.routes.resolve(path).action;
     }
 
     abstract render(context?: IActionContext): RenderResult;
@@ -125,8 +112,6 @@ export class ReactViewResult extends ActionResultBase {
 
         return new RenderResult(d, this);
     }
-
-    routes: Routes;
 }
 
 class RouteAction implements IAction {
@@ -140,155 +125,256 @@ class RouteAction implements IAction {
             const result = this.action(context);
             if (isActionResult(result))
                 return result;
-            else {
+            else if (result) {
                 return new ReactViewResult(result);
             }
         }
-        return new ReactViewResult(this.action);
+        return new EmptyResult();
+    }
+
+    static create(action: IAction | ActionFunc | IActionResult) {
+        return isAction(action)
+            ? action
+            : typeof (action) === "function"
+                ? new RouteAction(action)
+                : new RouteAction(() => action);
     }
 }
 
-const emptyResult: IActionResult = {
-    render(): RenderResult {
-        return new RenderResult(null, this);
-    }, 
-    partial() {
-        return null;
-    }
-}
 class NotFoundResult implements IActionResult {
+
+    routes: Routes = new Routes();
 
     constructor(public path: string) { }
 
     partial(path: string): IAction {
-        return new RouteAction(() => new NotFoundResult(this.path + "/" + path));
+        return null;
     }
 
     render(context?: IActionContext) {
-        iziToast.error({
-            message: "path not found: " + this.path
-        });
-        // toastr.error("path not found: "+ this.path);
+        const message = `Path not found: ${this.path}`;
+        const url = location ? location.href : this.path;
+        logger.error({ message, url, date: new Date() });
+        toast.error({ message });
     }
 }
 
-class RouteCache {
-    private path$: Rx.Subject<string> = new Rx.Subject();
-    private pathResults$: Rx.Observable<RouteCache>;
+export class EmptyResult implements IActionResult {
+    routes: Routes = new Routes();
 
-    constructor(private fn: (p: string) => Rx.Observable<IActionResult>, public basePath: string) {
-        this.pathResults$ = this.path$.pipe(
-            Ops.distinctUntilChanged(),
-            Ops.delay(3000),
-            switchMap((p: string) => this.fn(p).pipe(map(r => RouteCache.create(r, p)))),
-            // map(RouteCache.create),
-            // Ops.shareReplay(1),
-            Ops.tap(v => console.log("pass value", v))
-        );
-
+    partial(path: string): IAction {
+        return new RouteAction(() => this);
     }
 
-    static create(actionResult: IActionResult, basePath: string) {
-        console.log("create", actionResult);
-        return new RouteCache(
-            path => executeAction(resolveAction(actionResult, path)),
-            basePath
-        );
-    }
-
-    get(path: string) {
-        //if (this.prevPath === path) {
-        //    console.debug("reuse action result", path, this.cacheResult$);
-        //    return this.cacheResult$;
-        //}
-
-        this.path$.next(path);
-        return this.pathResults$;
+    render(context?: IActionContext) {
     }
 }
 
-const executeAction: (action: IAction) => Rx.Observable<IActionResult>
-    = (action: IAction) => {
-        var result = action ? action.execute(this) : emptyResult;
-        console.debug('executeAction', action, result);
-        return valueToObservable(result);
-    };
+export class ErrorResult implements IActionResult {
+    routes: Routes = new Routes();
 
-function resolveAction(ar: IActionResult, path: string) {
-    return ar && ar.partial(path);
+    constructor(private err: Error) {
+
+    }
+
+    partial(path: string): IAction {
+        return new RouteAction(() => new EmptyResult());
+    }
+
+    render(context?: IActionContext) {
+        console.error(this.err);
+        toast.error({ message: this.err.message });
+    }
 }
 
 class CacheEntry {
-    constructor(public path: string, public value: IActionResult, public renderResult: RenderResult) { }
+    constructor(public value: IActionResult, public renderResult: RenderResult | void) { }
+}
+
+type RouteEntry = {
+    pathname?: string,
+    parent: IActionResult,
+    cache: { [key: string]: CacheEntry }
 }
 
 export class Router {
-
-    private actions$: Rx.Observable<string[]>;
+    private actions$: Rx.Observable<string>;
     private active$: Rx.Subject<string>;
+    private cache: CacheEntry[] = [];
 
     constructor(public container: Element, public root: Value<IActionResult>) {
-        var passive$ = Rx.timer(0, 50).pipe(map(() => location.pathname));
+        var passive$ = Rx.timer(0, 50).pipe(Ro.map(() => location.pathname));
         this.active$ = new Rx.Subject<string>();
         this.actions$ = Rx.merge(passive$, this.active$).pipe(
-            distinctUntilChanged(),
-            map((pathname: string) => pathname ? pathname.split("/").filter(x => !!x) : []),
+            Ro.distinctUntilChanged()
+            // map((pathname: string) => pathname ? pathname.split("/").filter(x => !!x) : [])
         );
+
         this.start();
     }
 
-    private start() {
-        var cache: CacheEntry[] = [];
-        const { container } = this;
+    start() {
+        const actionContext: IActionContext = { container: this.container, router: this };
 
-        function disposeAt(idx: number) {
-            for (var i = idx; i < cache.length; i++) {
-                var renderResult = cache[i] && cache[i].renderResult;
-                renderResult && renderResult.disposable && renderResult.disposable.dispose();
+        function map<T, U>(value: Value<T>, project: (t: T) => U): Rx.Observable<U> {
+            return valueToObservable(value).pipe(
+                Ro.map(project)
+            );
+        }
+
+        function resolve({ parent, pathname, cache }: RouteEntry): Rx.Observable<RouteEntry> {
+
+            const resolution = parent.routes.resolve(pathname);
+            if (resolution) {
+                const tail = pathname.substr(resolution.path.length);
+                if (cache[resolution.path]) {
+                    let cacheEntry: CacheEntry = cache[resolution.path];
+
+                    return Rx.of(<RouteEntry>{
+                        parent: cacheEntry.value,
+                        pathname: tail,
+                        cache: {}
+                    });
+                }
+
+                return map(
+                    resolution.action.execute(actionContext),
+                    actionResult => {
+                        cache[resolution.path] = new CacheEntry(actionResult, actionResult.render(actionContext));
+
+                        return <RouteEntry>{
+                            parent: actionResult,
+                            pathname: tail,
+                            cache: {}
+                        };
+                    });
             }
-            cache.length = idx;
+            return null;
         }
 
-        function renderPartial(actionResult: IActionResult, { path, idx }: { path: string, idx: number }) {
-            if (cache[idx] && cache[idx].path === path)
-                return Rx.of(cache[idx].value);
+        let rootCache = {};
+        valueToObservable(this.root)
+            .pipe(
+                Ro.switchMap((root: IActionResult) =>
+                    this.actions$.pipe(
+                        Ro.switchMap((pathname: string) =>
+                        Rx.of(<RouteEntry>{ pathname, parent: root, cache: rootCache })
+                                .pipe(
+                                    Ro.expand((entry: RouteEntry) => {
+                                        const { pathname } = entry;
 
-            disposeAt(idx);
-            return executeAction(resolveAction(actionResult, path))
-                .pipe(tap(r => {
-                    var result = r.render({ container });
-                    if (result instanceof RenderResult)
-                        cache[idx] = new CacheEntry(path, r, result);
-                }));
-        }
+                                        if (typeof pathname === "string" && pathname) {
+                                            return resolve(entry) ||
+                                                Rx.of(<RouteEntry>{
+                                                    parent: new NotFoundResult(pathname),
+                                                    pathname: "",
+                                                    cache: {}
+                                                });
+                                        }
 
-        valueToObservable(this.root).pipe(
-            mergeMap(
-                root => this.actions$.pipe(
-                    switchMap((parts: string[]) => {
-                        disposeAt(parts.length);
-                        return Rx.from(parts.map((x, i) => ({ path: x, idx: i })))
-                            .pipe(mergeScan(renderPartial, root));
-                    }))
-            )).subscribe(x => console.log("subscribe", x));
+                                        return Rx.empty();
+                                    })
+                                )
+                        )
+                    )
+                )
+            ).subscribe((entry: RouteEntry) => console.log(entry.parent, entry.cache));
     }
 
-    action(pathname: string) {
+    executeAction(action: IAction): Rx.Observable<IActionResult> {
+        if (action) {
+            let result = action.execute({ container: this.container, router: this });
+            return valueToObservable(result);
+        } else {
+            return Rx.empty();
+        }
+    }
+
+    disposeAt(idx: number) {
+        const { cache } = this;
+        for (let i = idx; i < cache.length; i++) {
+            let renderResult: RenderResult | void = cache[i] && cache[i].renderResult;
+            if (renderResult instanceof RenderResult) {
+                renderResult.dispose();
+            }
+        }
+        cache.length = idx;
+    }
+
+    public action = (pathname: string) => {
         window.history.pushState(null, null, pathname);
         this.active$.next(pathname);
     }
 
-    // /**
-    // * Async resolve action
-    // * @param parent
-    // * @param path
-    // */
-    //resolve (parent: ActionResult, path: string): ActionResult {
-    //    return flatMap(parent, p => p.partial(path));
+    //public push = (path: string, action: IAction | ActionFunc | IActionResult) => {
+    //    const { cache } = this,
+    //        idx = cache.length,
+    //        actionContext: IActionContext = { container: this.container, router: this };
+
+    //    return executeAction(RouteAction.create(action), actionContext)
+    //        .pipe(Ro.tap((r: IActionResult) => {
+    //            var result = r.render(actionContext);
+    //            if (result instanceof RenderResult) {
+    //                cache[idx] = new CacheEntry(r, result);
+    //                window.history.pushState(null, null, path);
+    //            }
+    //        }))
+    //        .subscribe();
     //}
+
+    public parent = () => {
+        var i = location.pathname.lastIndexOf('/');
+        if (i >= 0) {
+            var parentPath = location.pathname.substr(0, i);
+            window.history.pushState(null, null, "/" + parentPath);
+        } else {
+            toast.error({ message: 'no parent' });
+        }
+    }
+
+    public modal = (title: string, body: View) => {
+        const { container } = this;
+        const node = document.createElement("div");
+        node.className = "modal";
+        node.tabIndex = -1;
+        node.setAttribute("role", "dialog");
+
+        container.appendChild(node);
+
+        var modal$ = layout.modal(title, body);
+        var observer = {
+            next(view) {
+                console.log(view);
+                return ReactDOM.render(view, node);
+            },
+            complete() {
+                ReactDOM.unmountComponentAtNode(node);
+                node.remove();
+            },
+            error(err) {
+                console.error(err);
+            }
+        };
+        var subscription = modal$.subscribe(observer);
+
+        return {
+            dismiss() {
+                subscription.unsubscribe();
+                observer.complete();
+            }
+        }
+    }
 }
 
 class RenderResult {
     constructor(public disposable: IDisposable, public actionResult: IActionResult) {
     }
+
+    dispose() {
+        const { disposable } = this;
+        if (disposable)
+            disposable.dispose();
+    }
 }
+
+
