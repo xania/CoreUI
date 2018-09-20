@@ -1,5 +1,7 @@
 ﻿import * as React from "react"
-import { search } from  "./search"
+import { search } from "./search"
+import * as Rx from "rxjs"
+import * as Ro from "rxjs/operators"
 
 export function message(text: string) {
     return (
@@ -8,6 +10,11 @@ export function message(text: string) {
 }
 
 export function intro() {
+    let view$ = Rx.interval(100).pipe(
+        Ro.startWith(1),
+        Ro.map(x => <div>{x}</div>)
+    );
+
     return (
         <div className="flex-columns-container">
             intro
@@ -15,8 +22,34 @@ export function intro() {
             <a href="/test/ff">test ff</a>
             <a href="/test/dd">test dd</a>
             <a href="/test/dd/gg">test dd gg</a>
+            { await(view$) }
         </div>
     );
+}
+
+type AwaitProps = { children: Rx.Observable<JSX.Element> }
+export class Await extends React.Component<AwaitProps> {
+
+    state = {
+        view: null as JSX.Element
+    }
+
+    constructor(props) {
+        super(props);
+        console.log(props);
+        props.children.subscribe(view => this.setState({ view }));
+    }
+    render() {
+        return (
+            <div>
+                { this.state.view }
+            </div>
+        );
+    }
+}
+
+export function await(view$: Rx.Observable<JSX.Element>) {
+    return <Await>{view$}</Await>;
 }
 
 export function sample() {
@@ -46,7 +79,7 @@ export function sample() {
 export function section(header: string | JSX.Element, main: JSX.Element) {
     return (
         <div className="panel flex-columns-container">
-            {typeof header === "string" ? sectionHeader(header) : header }
+            {typeof header === "string" ? sectionHeader(header) : header}
             <div style={{ flexGrow: 1 }}>
                 {main}
             </div>

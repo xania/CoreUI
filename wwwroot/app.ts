@@ -1,7 +1,6 @@
 ﻿import '@coreui/coreui';
 import { Router, ReactViewResult } from "./src/mvc";
 import * as $ from "jquery";
-import { logsView } from "./src/diagnostics/logger";
 import * as views from "./src/shared/views";
 import iziToast from "./src/diagnostics/toast"
 
