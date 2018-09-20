@@ -1,32 +1,59 @@
-export type ErrorResult = { success: false, payload: any };
-export declare type AsyncFunc<T, U> = (x: T) => PromiseLike<U>
-export declare type Func<T, U> = (x: T) => U
+import * as Rx from "rxjs";
 
-export function isPromiseLike<T>(p: T | PromiseLike<T>): p is PromiseLike<T> {
-    return p && typeof (<PromiseLike<T>>p).then === "function";
-}
+export type ErrorResult = { success: false, type: "invalid" | "unauthorized", payload: () => any };
+export declare type AsyncFunc<T, TU> = (x: T) => PromiseLike<TU>
+export declare type Func<T, TU> = (x: T) => TU
 
 export function isErrorResult<T>(result: T | ErrorResult): result is ErrorResult {
     return result['success'] === false;
 }
 
-export function errorResult(payload): ErrorResult {
-    return { success: false, payload }
+function responseType(response): "unauthorized" | "invalid" {
+    return response.status === 401 ? "unauthorized" : "invalid";
+}
+
+export function errorResult(response): ErrorResult {
+    return {
+        success: false,
+        type: responseType(response),
+        payload: () => response.json()
+    };
+}
+
+const tryFetchDefaults = {
+    credentials: "same-origin",
+    headers: {
+        'Content-Type': "application/json",
+        'Accept': "application/json"
+    }
 }
 
 export function tryFetch<T>(url: string, init?: RequestInit): PromiseLike<T | ErrorResult> {
-
-    var config = Object.assign({
-            credentials: "same-origin",
-            headers: {
-                'Content-Type': "application/json",
-                'Accept': "application/json"
-            }
-        },
-        init);
+    const config = Object.assign(tryFetchDefaults, init);
 
     return fetch(url, config).then(response => {
-        if (response.ok) return response.json();
-        return response.json().then(errorResult);
+        if (response.ok)
+            return response.json();
+
+        return Promise.reject(errorResult(response));
     });
+}
+
+export class PipeSubject<T, U> extends Rx.Observable<U> {
+    constructor(private input$: Rx.Subject<T>, private output$: Rx.Observable<U>) {
+        super(output$.subscribe.bind(output$));
+    }
+
+    static create<T>() {
+        var input$ = new Rx.Subject<T>();
+        return new PipeSubject(input$, input$);
+    }
+
+    next(value: T) {
+        this.input$.next(value);
+    }
+
+    bind<V>(handler: Rx.OperatorFunction<U, V>): PipeSubject<T, V> {
+        return new PipeSubject<T, V>(this.input$, handler(this.output$));
+    }
 }
