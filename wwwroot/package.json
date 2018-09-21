@@ -1,0 +1,41 @@
+{
+  "version": "1.0.0",
+  "name": "asp.net",
+  "private": true,
+  "scripts": {
+    "restore": "jspm install",
+    "build": "tsc --p tsconfig.json",
+    "bundle-vendor": "jspm bundle vendor bundles\\vendor-bundle.js --minify",
+    "bundle-app": "jspm bundle app - vendor bundles\\app-bundle.js --minify",
+    "depcache": "jspm depcache app",
+    "lessc": "lessc css\\xania.less css\\xania.min.css"
+  },
+  "devDependencies": {
+    "jspm": "^0.16.53",
+    "typescript": "^3.0.3"
+  },
+  "dependencies": {
+    "@coreui/coreui": "^2.0.6",
+    "@types/react": "^16.4.14",
+    "@types/react-dom": "^16.0.7",
+    "jquery": "^3.3.1",
+    "perfect-scrollbar": "^1.4.0",
+    "popper.js": "^1.14.4"
+  },
+  "jspm": {
+    "dependencies": {
+      "@aspnet/signalr": "npm:@aspnet/signalr@^1.0.2",
+      "@coreui/coreui": "npm:@coreui/coreui@^2.0.6",
+      "@coreui/icons": "npm:@coreui/icons@^0.3.0",
+      "izitoast": "npm:izitoast@^1.4.0",
+      "jquery": "npm:jquery@^3.3.1",
+      "react": "npm:react@^16.4.1",
+      "react-dom": "npm:react-dom@^16.4.1",
+      "rxjs": "npm:rxjs@^6.2.1",
+      "tslib": "npm:tslib@^1.9.3"
+    },
+    "devDependencies": {
+      "typescript": "npm:typescript@2.9.2"
+    }
+  }
+}

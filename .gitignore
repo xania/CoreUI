@@ -266,3 +266,5 @@ __pycache__/
 *.pyc
 /wwwroot/bundles
 /wwwroot/jspm_packages/
+*.js
+*.map

@@ -32,16 +32,6 @@ function log(type: 'info' | 'error' | 'warn' | 'debug', body) {
     });
 }
 
-const connection = new signalR.HubConnectionBuilder()
-    .withUrl("/loggerHub")
-    .build();
-
-var logs = new Rx.Subject<IClientError>();
-connection.on("serverError", (error) => {logs.next(error);});
-connection.on("serverDebug", (message) => { console.log(message); });
-
-connection.start().catch(err => console.error(err.toString()));
-
 function enqueue<T>(arr: T[], item: T, maxSize: number = 10) {
     for (var i = arr.length; i > 0; i--) {
         arr[i] = arr[i - 1];
@@ -72,4 +62,16 @@ export function testView(): ReactViewResult {
 
 export function ddView() {
     return views.section("dd", views.message("dd"));
+}
+
+if (window.navigator.onLine) {
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/loggerHub")
+        .build();
+
+    var logs = new Rx.Subject<IClientError>();
+    connection.on("serverError", (error) => { logs.next(error); });
+    connection.on("serverDebug", (message) => { console.log(message); });
+
+    connection.start().catch(err => console.error(err.toString()));
 }

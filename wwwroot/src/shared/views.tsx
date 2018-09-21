@@ -30,15 +30,25 @@ export function intro() {
 type AwaitProps = { children: Rx.Observable<JSX.Element> }
 export class Await extends React.Component<AwaitProps> {
 
+    private subscription: Rx.Subscription;
+
     state = {
         view: null as JSX.Element
     }
 
     constructor(props) {
         super(props);
-        console.log(props);
-        props.children.subscribe(view => this.setState({ view }));
     }
+
+    componentDidMount(): void {
+        this.subscription = this.props.children.subscribe(view => this.setState({ view }));
+    }
+
+    componentWillUnmount(): void {
+        this.subscription.unsubscribe();
+    }
+
+
     render() {
         return (
             <div>
