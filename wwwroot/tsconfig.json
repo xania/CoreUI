@@ -10,9 +10,9 @@
     "jsx": "react",
     "baseUrl": "",
     "paths": {
-      "rxjs": [ "jspm_packages/npm/rxjs@6.2.1" ],
-      "rxjs/*": [ "jspm_packages/npm/rxjs@6.2.1/*" ],
-      "@aspnet/signalr": [ "jspm_packages/npm/@aspnet/signalr@1.0.2" ],
+      "rxjs": [ "jspm_packages/npm/rxjs@6.3.2" ],
+      "rxjs/*": [ "jspm_packages/npm/rxjs@6.3.2/*" ],
+      "@aspnet/signalr": [ "jspm_packages/npm/@aspnet/signalr@1.0.3" ],
       "izitoast": [ "jspm_packages/npm/izitoast@1.4.0" ]
     }
   },

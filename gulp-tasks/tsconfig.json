@@ -1,7 +1,7 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "lib": [ "es2018", "dom" ],
+    "lib": [ "es2018" ],
     "noImplicitAny": false,
     "noEmitOnError": true,
     "removeComments": false,

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2000
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "1. Xania.CoreUI", "1. Xania.CoreUI.csproj", "{0EE2C6C8-D07D-426E-9481-5CF4E84C8066}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xania.CoreUI", "Xania.CoreUI.csproj", "{D37FD59B-D94A-41CC-BBC0-C5E8E0D97149}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0EE2C6C8-D07D-426E-9481-5CF4E84C8066}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0EE2C6C8-D07D-426E-9481-5CF4E84C8066}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0EE2C6C8-D07D-426E-9481-5CF4E84C8066}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0EE2C6C8-D07D-426E-9481-5CF4E84C8066}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D37FD59B-D94A-41CC-BBC0-C5E8E0D97149}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D37FD59B-D94A-41CC-BBC0-C5E8E0D97149}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D37FD59B-D94A-41CC-BBC0-C5E8E0D97149}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D37FD59B-D94A-41CC-BBC0-C5E8E0D97149}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
