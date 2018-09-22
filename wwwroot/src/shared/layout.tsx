@@ -1,6 +1,5 @@
 ﻿import * as React from "react"
-import * as Rx from 'rxjs'
-import { filter, map, startWith, combineLatest } from "rxjs/operators"
+import * as Rx from 'vendor'
 import { rateLimit, search, loader } from "../shared/search"
 import { isErrorResult, ErrorResult, Func, AsyncFunc } from "./data"
 
@@ -42,7 +41,7 @@ export function searchSection<T>(title: string, getData: (term: string) => Promi
     const data$ = input$.pipe(rateLimit(getData, loading$));
 
     return data$.pipe(
-        filter((x: T | ErrorResult) => {
+        Rx.filter((x: T | ErrorResult) => {
             if (isErrorResult(x)) {
                 // TODO we need to show a toast here.
                 console.error(x.payload);
@@ -50,10 +49,10 @@ export function searchSection<T>(title: string, getData: (term: string) => Promi
             }
             return true;
         }),
-        map(renderData),
-        startWith(<main>Geen data...</main>),
-        combineLatest(loading$, (dataView, loading) => loader(loading, dataView)),
-        map(dataView => section(title, search(input$), dataView, <div>hello</div>))
+        Rx.map(renderData),
+        Rx.startWith(<main>Geen data...</main>),
+        Rx.combineLatest(loading$, (dataView, loading) => loader(loading, dataView)),
+        Rx.map(dataView => section(title, search(input$), dataView, <div>hello</div>))
     );
 }
 

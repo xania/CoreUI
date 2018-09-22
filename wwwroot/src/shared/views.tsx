@@ -1,7 +1,6 @@
 ﻿import * as React from "react"
 import { search } from "./search"
-import * as Rx from "rxjs"
-import * as Ro from "rxjs/operators"
+import * as Rx from "vendor"
 
 export function message(text: string) {
     return (
@@ -11,8 +10,8 @@ export function message(text: string) {
 
 export function intro() {
     let view$ = Rx.interval(100).pipe(
-        Ro.startWith(1),
-        Ro.map(x => <div>{x}</div>)
+        Rx.startWith(1),
+        Rx.map(x => <div>{x}</div>)
     );
 
     return (
@@ -30,7 +29,7 @@ export function intro() {
 type AwaitProps = { children: Rx.Observable<JSX.Element> }
 export class Await extends React.Component<AwaitProps> {
 
-    private subscription: Rx.Subscription;
+    private subscription: Rx.SubscriptionLike;
 
     state = {
         view: null as JSX.Element

@@ -1,11 +1,6 @@
-﻿﻿import * as Rx from "rxjs";
-import * as Ro from "rxjs/operators";
+﻿﻿import * as Rx from "../vendor";
 import { isErrorResult } from "./shared/data";
 import * as ReactDOM from "react-dom"
-import { isPromise } from 'rxjs/internal/util/isPromise';
-import { isInteropObservable } from 'rxjs/internal/util/isInteropObservable';
-import { fromPromise } from 'rxjs/internal/observable/fromPromise';
-import { fromObservable } from 'rxjs/internal/observable/fromObservable';
 
 declare type View = JSX.Element;
 declare type Value<T> = T | Rx.Observable<T> | Rx.InteropObservable<T> | PromiseLike<T>;
@@ -62,10 +57,10 @@ function valueToObservable<T>(input: Value<T>): Rx.Observable<T> {
         return Rx.of(input as any);
     } else if (Rx.isObservable(input)) {
         return input;
-    } else if (isInteropObservable(input)) {
-        return fromObservable(input, null);
-    } else if (isPromise(input)) {
-        return fromPromise(input);
+    } else if (Rx.isInteropObservable(input)) {
+        return Rx.fromObservable(input, null);
+    } else if (Rx.isPromise(input)) {
+        return Rx.fromPromise(input);
     } else {
         return Rx.of(input);
     }
@@ -238,9 +233,9 @@ export class Router {
 
     constructor(public container: Element, public root: Value<IActionResult>, public toast: Toast) {
         var passive$ = Rx.timer(0, 50).pipe(
-            Ro.map(() => location.pathname),
-            Ro.distinctUntilChanged(),
-            Ro.map((pathname: string) => pathname.split("/").filter(x => !!x) as Route),
+            Rx.map(() => location.pathname),
+            Rx.distinctUntilChanged(),
+            Rx.map((pathname: string) => pathname.split("/").filter(x => !!x) as Route),
         );
 
         this.active$ = new Rx.Subject<Route>();
@@ -248,7 +243,7 @@ export class Router {
         this.actions$ =
             Rx.merge(passive$, this.active$)
                 .pipe(
-                    Ro.distinctUntilChanged((xv: any[], yv: any[]) => {
+                    Rx.distinctUntilChanged((xv: any[], yv: any[]) => {
                         if (xv.length !== yv.length)
                             return false;
 
@@ -260,7 +255,7 @@ export class Router {
 
                         return true;
                     }),
-                    Ro.tap(log("action"))
+                    Rx.tap(log("action"))
                 );
 
         this.start();
@@ -275,7 +270,7 @@ export class Router {
 
         function map<T, U>(value: Value<T>, project: (t: T) => U): Rx.Observable<U> {
             return valueToObservable(value).pipe(
-                Ro.map(project)
+                Rx.map(project)
             );
         }
 
@@ -321,15 +316,15 @@ export class Router {
 
         valueToObservable(this.root)
             .pipe(
-                Ro.map(root => new RouteResult("", root, root.render(actionContext))),
-                Ro.reduce((acc, value: RouteResult) => {
+                Rx.map(root => new RouteResult("", root, root.render(actionContext))),
+                Rx.reduce((acc, value: RouteResult) => {
                     acc.dispose();
                     console.log("root element is disposed!", acc);
                     return value;
                 }),
-                Ro.combineLatest(this.actions$, (rootResult, route) => <RouteEntry>{ route, parent: rootResult }),
-                Ro.tap(log("latest")),
-                Ro.expand(resolveRoute)
+                Rx.combineLatest(this.actions$, (rootResult, route) => <RouteEntry>{ route, parent: rootResult }),
+                Rx.tap(log("latest")),
+                Rx.expand(resolveRoute)
             ).subscribe((entry: RouteEntry) => console.log(entry));
     }
 

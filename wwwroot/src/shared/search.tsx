@@ -1,16 +1,15 @@
 ﻿import * as React from 'react'
-import * as Rx from 'rxjs'
-import { tap, debounceTime, distinctUntilChanged, switchMap, share } from 'rxjs/operators'
+import * as Rx from "../../vendor"
 import { LoadingIndicator } from "./loading-indicator"
 
 export function rateLimit<T, U>(project: (arg: T) => Rx.ObservableInput<U>, loader$: Rx.NextObserver<boolean>): Rx.UnaryFunction<Rx.Observable<T>, Rx.Observable<U>> {
     return Rx.pipe(
-        distinctUntilChanged<T>(),
-        tap(() => loader$.next(true)),
-        debounceTime(400),
-        switchMap(project),
-        tap(() => loader$.next(false)),
-        share()
+        Rx.distinctUntilChanged<T>(),
+        Rx.tap(() => loader$.next(true)),
+        Rx.debounceTime(400),
+        Rx.switchMap(project),
+        Rx.tap(() => loader$.next(false)),
+        Rx.share()
     );
 }
 

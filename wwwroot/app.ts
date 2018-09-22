@@ -1,6 +1,6 @@
 ﻿import '@coreui/coreui';
 import { Router, ReactViewResult } from "./src/mvc";
-import * as $ from "jquery";
+// import * as $ from "jquery";
 import * as views from "./src/shared/views";
 import iziToast from "./src/diagnostics/toast"
 
@@ -20,11 +20,11 @@ export function run(main: HTMLElement) {
         toast
     );
 
-    $(main).delegate("a",
-        "click",
-        event => {
-            var target = event.target;
-            event.preventDefault();
-            router.action(target.pathname);
-        });
+    //$(main).delegate("a",
+    //    "click",
+    //    event => {
+    //        var target = event.target;
+    //        event.preventDefault();
+    //        router.action(target.pathname);
+    //    });
 }

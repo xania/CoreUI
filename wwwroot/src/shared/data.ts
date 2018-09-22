@@ -1,4 +1,4 @@
-import * as Rx from "rxjs";
+import * as Rx from "vendor";
 
 export type ErrorResult = { success: false, type: "invalid" | "unauthorized", payload: () => any };
 export declare type AsyncFunc<T, TU> = (x: T) => PromiseLike<TU>

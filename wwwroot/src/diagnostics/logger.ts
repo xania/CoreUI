@@ -1,6 +1,5 @@
 ﻿import * as signalR from '@aspnet/signalr'
-import * as Rx from 'rxjs'
-import { map, startWith } from 'rxjs/operators'
+import * as Rx from 'vendor'
 import { create, IClientError } from "./view"
 import { ReactViewResult } from "../mvc"
 import * as views from "../shared/views"
@@ -45,10 +44,10 @@ function enqueue<T>(arr: T[], item: T, maxSize: number = 10) {
 export function logsView(): ReactViewResult {
     var arr = [];
     var view$ = logs.pipe(
-        map(error => enqueue(arr, { id: new Date().getTime(), ...error }, 100)),
-        startWith([]),
-        map(create),
-        map(v => views.section("Logs", v))
+        Rx.map(error => enqueue(arr, { id: new Date().getTime(), ...error }, 100)),
+        Rx.startWith([]),
+        Rx.map(create),
+        Rx.map(v => views.section("Logs", v))
     );
 
     return new ReactViewResult(view$)
