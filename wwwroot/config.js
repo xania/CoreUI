@@ -6,7 +6,7 @@ System.config({
     "github:*": "jspm_packages/github/*",
     "npm:*": "jspm_packages/npm/*"
   },
-  warnings: true,
+  warnings: false,
 
   map: {
     "@aspnet/signalr": "npm:@aspnet/signalr@1.0.3",

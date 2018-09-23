@@ -56,8 +56,8 @@ function cleanBundles() {
 
 function generateBundles(done) {
     const jspmBundles = Promise.all([
-        jspm.bundle("vendor", "wwwroot/bundles/vendor-bundle.js"),
-        jspm.bundle("app - vendor - jquery", "wwwroot/bundles/app-bundle.js")
+        jspm.bundle("vendor - jquery", "wwwroot/bundles/vendor-bundle.js", { minify: true }),
+        jspm.bundle("app - vendor - jquery", "wwwroot/bundles/app-bundle.js", { minify: true })
     ]);
 
     return jspmBundles.then(() => {

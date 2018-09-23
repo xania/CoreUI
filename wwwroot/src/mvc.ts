@@ -262,8 +262,6 @@ export class Router {
                     }),
                     Ro.tap(log("action"))
                 );
-
-        this.start();
     }
 
     start() {
