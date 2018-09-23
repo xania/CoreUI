@@ -79,9 +79,10 @@ function generateBundles(done) {
 //    .pipe(gulp.dest('.'));
 export const js = gulp.series([cleanBundles, generateBundles]);
 
-export default function (done) {
-    return gulp
-        .src(["wwwroot/jspm_packages/system.js"])
+export function copySystemJS() {
+    return gulp.src(["wwwroot/jspm_packages/system.js"])
         .pipe(gulp.dest("wwwroot/vendor/"))
         ;
 }
+
+export const build = gulp.parallel([copySystemJS, js, css])
