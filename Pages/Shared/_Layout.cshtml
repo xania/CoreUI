@@ -15,14 +15,13 @@ private IEnumerable<string> GetBundles()
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <meta name="Description" content="Author: I. ben Salah,
+        Modern Web Platform, Progressive Web App, React">
+    <meta name="theme-color" content="#db5945" />
     <title>Xania</title>
-
-    <link href="~/jspm_packages/npm/izitoast@1.4.0/dist/css/iziToast.min.css" rel="stylesheet" />
-    <link href="~/jspm_packages/npm/@@coreui/coreui@2.0.6/dist/css/coreui.min.css" rel="stylesheet" />
-    <link href="~/jspm_packages/npm/@@coreui/icons@0.3.0/css/coreui-icons.min.css" rel="stylesheet" />
-
-
-    <link href="~/css/xania.min.css" rel="stylesheet" />
+    <link rel="manifest" href="~/pwa/manifest.json">
+    <link href="~/vendor/css/all.css" rel="stylesheet" />
+    <link href="~/css/xania.css" rel="stylesheet" />
     @RenderSection("head", required: false)
 </head>
 <body class="app header-fixed sidebar-md-show sidebar-fixed">
@@ -39,26 +38,18 @@ private IEnumerable<string> GetBundles()
         </aside>
     </div>
 
-    <environment include="Development">
-        <script src="~/jspm_packages/system.src.js"></script>
-        @*<script>
-            var systemLocate = System.locate;
-            var time = new Date().getTime();
-            System.locate = function (load) {
-                return Promise.resolve(systemLocate.call(this, load)).then(function (address) {
-                    return address + '?' + time;
-                });
-            }
-        </script>*@
-    </environment>
-    <environment exclude="Development">
-        <script src="~/system.js"></script>
-    </environment>
+    <script src="~/vendor/system.js"></script>
+    @*<script>
+        var systemLocate = System.locate;
+        var time = new Date().getTime();
+        System.locate = function (load) {
+            return Promise.resolve(systemLocate.call(this, load)).then(function (address) {
+                return address + '?' + time;
+            });
+        }
+    </script>*@
     <script src="~/config.js"></script>
-    @foreach (var p in GetBundles())
-    {
-        <script src="@p"></script>
-    }
+    @foreach (var p in GetBundles()) { <script src="@p"></script> }
     @RenderSection("Scripts", required: false)
 
     <partial name="_Templates" />

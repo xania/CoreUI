@@ -15,6 +15,7 @@
     "gulp": "^4.0.0",
     "gulp-clean": "^0.4.0",
     "gulp-clean-css": "^3.10.0",
+    "gulp-copy": "^4.0.0",
     "gulp-hash": "^4.2.2",
     "gulp-hash-filename": "^1.2.0",
     "gulp-less": "^4.0.1",

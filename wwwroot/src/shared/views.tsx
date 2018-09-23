@@ -17,12 +17,15 @@ export function intro() {
 
     return (
         <div className="flex-columns-container">
-            intro
+            <h1>tiles</h1>
             <a href="/log">log</a>
             <a href="/test/ff">test ff</a>
             <a href="/test/dd">test dd</a>
             <a href="/test/dd/gg">test dd gg</a>
-            { await(view$) }
+            {await(view$)}
+            <div>
+                <input type="file" accept="image/*" capture="capture" />
+            </div>
         </div>
     );
 }
@@ -52,7 +55,7 @@ export class Await extends React.Component<AwaitProps> {
     render() {
         return (
             <div>
-                { this.state.view }
+                {this.state.view}
             </div>
         );
     }

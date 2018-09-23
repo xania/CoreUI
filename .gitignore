@@ -268,3 +268,4 @@ __pycache__/
 /wwwroot/jspm_packages/
 *.js
 *.map
+/wwwroot/vendor/fonts
