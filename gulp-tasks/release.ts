@@ -48,14 +48,9 @@ export function css(done) {
     return Promise.all([vendorCss, appCss, fontsTasks]);
 }
 
-function cleanBundles() {
-    return gulp
-        .src("wwwroot/bundles/*.js")
-        .pipe(clean());
-}
-
 function generateBundles(done) {
     const jspmBundles = Promise.all([
+        gulp.src("wwwroot/bundles/*.js").pipe(clean()),
         jspm.bundle("vendor - jquery", "wwwroot/bundles/vendor-bundle.js", { minify: true }),
         jspm.bundle("app - vendor - jquery", "wwwroot/bundles/app-bundle.js", { minify: true })
     ]);
@@ -77,7 +72,7 @@ function generateBundles(done) {
 //        sourceDir: __dirname + '/public/js'
 //    }))
 //    .pipe(gulp.dest('.'));
-export const js = gulp.series([cleanBundles, generateBundles]);
+export const js = generateBundles;
 
 export function copySystemJS() {
     return gulp.src(["wwwroot/jspm_packages/system.js"])
@@ -85,4 +80,4 @@ export function copySystemJS() {
         ;
 }
 
-export const build = gulp.parallel([copySystemJS, js, css])
+export const releaseBuild = gulp.parallel([copySystemJS, js, css])
