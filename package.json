@@ -12,6 +12,7 @@
   },
   "devDependencies": {
     "chalk": "^2.4.1",
+    "cryptiles": "^4.1.2",
     "gulp": "^4.0.0",
     "gulp-clean": "^0.4.0",
     "gulp-clean-css": "^3.10.0",

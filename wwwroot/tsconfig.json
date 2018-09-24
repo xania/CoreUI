@@ -9,6 +9,7 @@
     "target": "es5",
     "jsx": "react",
     "baseUrl": "",
+    "moduleResolution": "node",
     "paths": {
       "rxjs": [ "jspm_packages/npm/rxjs@6.3.2" ],
       "rxjs/*": [ "jspm_packages/npm/rxjs@6.3.2/*" ],

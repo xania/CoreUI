@@ -11,7 +11,7 @@ export function message(text: string) {
 
 export function intro() {
     let view$ = Rx.interval(100).pipe(
-        Ro.startWith(1),
+        Ro.startWith("..."),
         Ro.map(x => <div>{x}</div>)
     );
 
@@ -22,7 +22,7 @@ export function intro() {
             <a href="/test/ff">test ff</a>
             <a href="/test/dd">test dd</a>
             <a href="/test/dd/gg">test dd gg</a>
-            {await(view$)}
+            {awaitView(view$)}
             <div>
                 <input type="file" accept="image/*" capture="capture" />
             </div>
@@ -61,7 +61,7 @@ export class Await extends React.Component<AwaitProps> {
     }
 }
 
-export function await(view$: Rx.Observable<JSX.Element>) {
+export function awaitView(view$: Rx.Observable<JSX.Element>) {
     return <Await>{view$}</Await>;
 }
 

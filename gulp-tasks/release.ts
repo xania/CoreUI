@@ -5,7 +5,6 @@ const cleanCss = require("gulp-clean-css");
 import * as jspm from "jspm";
 import * as hash from "gulp-hash";
 import * as clean from "gulp-clean";
-import * as copy from "gulp-copy";
 
 //var ts = require("gulp-typescript");
 
