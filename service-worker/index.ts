@@ -4,7 +4,6 @@ const RUNTIME = 'runtime';
 
 // A list of local resources we always want to be cached.
 const PRECACHE_URLS = [
-    './',
     'css/xania.min.css'
 ];
 
@@ -13,7 +12,7 @@ let sw = self as any as ServiceWorkerGlobalScope;
 // The install handler takes care of precaching the resources we always need.
 self.addEventListener("install", (event: ExtendableEvent) => {
     event.waitUntil(caches.open(PRECACHE)
-        .then(cache => cache.addAll(PRECACHE_URLS))
+        .then(cache => cache.addAll && cache.addAll(PRECACHE_URLS))
         .then(sw.skipWaiting));
 });
 
@@ -37,31 +36,32 @@ self.addEventListener('activate', (event: ExtendableEvent) => {
 self.addEventListener("fetch", (event: FetchEvent) => {
     // Skip cross-origin requests, like those for Google Analytics.
     if (event.request.url.startsWith(self.location.origin)) {
-        event.respondWith(
-            caches.match(event.request).then(cachedResponse => {
+        const responsePromise =
+            caches.match(event.request).then(async cachedResponse => {
                 if (cachedResponse) {
                     return cachedResponse;
                 }
 
-                return fetch(event.request).then(networkResponse => {
-                    if (isStaticFile(event.request)) {
-                        return caches.open(RUNTIME).then(cache => {
-                            // Put a copy of the response in the runtime cache.
-                            return cache.put(event.request, networkResponse.clone()).then(() => {
-                                return networkResponse;
-                            });
-                        });
-                    } else {
+                let networkResponse = await fetch(event.request);
+                if (shouldCache(event.request, networkResponse)) {
+                    let cache = await caches.open(RUNTIME);
+                    // Put a copy of the response in the runtime cache.
+                    if (cache.put) {
+                        await cache.put(event.request, networkResponse.clone());
                         return networkResponse;
-                    }
-                });
-            })
-        );
+                    } else
+                        return networkResponse;
+                } else {
+                    return networkResponse;
+                }
+            });
+        event.respondWith(responsePromise);
     }
 });
 
-function isStaticFile(request: Request) {
-    return request
+function shouldCache(request: Request, response: Response) {
+    return response
+        && response.ok
         && request.method === "GET"
         && /\.(js|png|jpg|jpeg|svg|html|css|ttf|ico)(\?.*)?$/i.test(request.url);
 }
