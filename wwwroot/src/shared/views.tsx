@@ -10,7 +10,7 @@ export function message(text: string) {
 }
 
 export function intro() {
-    let view$ = Rx.interval(100).pipe(
+    let view$: Rx.Observable<JSX.Element> = Rx.interval(100).pipe(
         Ro.startWith("..."),
         Ro.map(x => <div>{x}</div>)
     );
@@ -24,7 +24,10 @@ export function intro() {
             <a href="/test/dd/gg">test dd gg</a>
             {awaitView(view$)}
             <div>
-                <input type="file" accept="image/*" capture="capture" />
+                <form action="/drive/file/test" encType="multipart/form-data"  method="POST">
+                    <input type="file" accept="image/*" name="files" capture="capture" />
+                    <button type="submit">submit</button>
+                </form>
             </div>
         </div>
     );

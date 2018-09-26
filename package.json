@@ -37,6 +37,7 @@
     "dependencies": {
       "@aspnet/signalr": "npm:@aspnet/signalr@^1.0.3",
       "@coreui/coreui": "npm:@coreui/coreui@^2.0.6",
+      "@coreui/icons": "npm:@coreui/icons@^0.3.0",
       "izitoast": "npm:izitoast@^1.4.0",
       "react": "npm:react@^16.5.2",
       "react-dom": "npm:react-dom@^16.5.2",

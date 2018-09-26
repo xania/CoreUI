@@ -38,7 +38,7 @@ namespace Xania.CoreUI.Drive
                     {
                         Folder = folder,
                         ContentType = formFile.ContentType,
-                        Name = formFile.Name,
+                        Name = formFile.FileName,
                         ResourceId = resourceId
                     });
                 }
@@ -48,10 +48,10 @@ namespace Xania.CoreUI.Drive
         }
 
         [HttpGet]
-        [Route("{*resourcePath}")]
-        public HttpResponseMessage Get(string resourcePath)
+        [Route("download/{resourceId}")]
+        public HttpResponseMessage Get(string resourceId)
         {
-            var file = _fileRepository.Get(resourcePath);
+            var file = _fileRepository.Get(resourceId);
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new HttpFileContent(file)
@@ -68,7 +68,7 @@ namespace Xania.CoreUI.Drive
                 {
                     ResourceId = file.ResourceId,
                     Name = file.Name,
-                    Url = Url.Content("~/data/file/download/" + file.ResourceId)
+                    Url = Url.Content("~/drive/file/download/" + file.ResourceId)
                 };
             return Ok(files);
         }

@@ -20,7 +20,11 @@ namespace Xania.CoreUI.Drive
         {
             var metadata = FileMetadata.FromFile(file);
             await _metadataRepository.AddAsync(metadata);
-            // await _documentStore.AddAsync(file.Folder, metadata.ResourceId, file.CopyToAsync);
+            using (var stream = _documentStore.OpenWrite(file.Folder, file.ResourceId))
+            {
+                await file.CopyToAsync(stream);
+                // await .AddAsync(file.Folder, metadata.ResourceId, file.CopyToAsync);
+            }
         }
 
         public IFile Get(string resourceId)

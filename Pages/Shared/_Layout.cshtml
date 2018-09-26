@@ -37,8 +37,13 @@ private IEnumerable<string> GetBundles()
             <!-- Aside menu content here -->
         </aside>
     </div>
-
-    <script src="~/vendor/system.js"></script>
+    
+    <environment exclude="Development">
+        <script src="~/vendor/system.js"></script>
+    </environment>
+    <environment include="Development">
+        <script src="~/jspm_packages/system.js"></script>
+    </environment>
     @*<script>
         var systemLocate = System.locate;
         var time = new Date().getTime();
