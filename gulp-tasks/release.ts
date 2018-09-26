@@ -1,10 +1,11 @@
-﻿import * as gulp from "gulp"
-import * as less from "gulp-less"
+﻿import * as gulp from "gulp";
+import * as less from "gulp-less";
 // import * as sourcemaps from 'gulp-sourcemaps'
-const cleanCss = require("gulp-clean-css")
-import * as jspm from "jspm"
-import * as hash from "gulp-hash"
-import * as clean from "gulp-clean"
+const cleanCss = require("gulp-clean-css");
+import * as jspm from "jspm";
+import * as hash from "gulp-hash";
+import * as clean from "gulp-clean";
+
 //var ts = require("gulp-typescript");
 
 //export function build() {
@@ -19,32 +20,38 @@ import * as clean from "gulp-clean"
 //        .js.pipe(gulp.dest(folder));
 //}
 
-export function css() {
-    return gulp
+export function css(done) {
+    let appCss = gulp
         .src(["wwwroot/css/xania.less"])
-        .pipe(hash())
         // .pipe(sourcemaps.init({ loadMaps: true }))
         .pipe(less())
         .pipe(cleanCss())
         // .pipe(sourcemaps.write({ includeContent: false, addComment: false, sourceRoot: '/css' }))
         .pipe(gulp.dest("wwwroot/css"))
         ;
-}
 
-function restoreLibraries(done) {
-    return jspm.install(true).then(done)
-};
+    let vendorCss = gulp
+        .src(["wwwroot/vendor/css/all.less"])
+        // .pipe(sourcemaps.init({ loadMaps: true }))
+        .pipe(less())
+        .pipe(cleanCss())
+        // .pipe(sourcemaps.write({ includeContent: false, addComment: false, sourceRoot: '/css' }))
+        .pipe(gulp.dest("wwwroot/vendor/css"))
+        ;
 
-function cleanBundles() {
-    return gulp
-        .src("wwwroot/bundles/*.js")
-        .pipe(clean());
+    let fontsTasks = gulp
+        .src(["wwwroot/jspm_packages/npm/@coreui/icons@0.3.0/fonts/*"])
+        .pipe(gulp.dest("wwwroot/vendor/fonts/"))
+        ;
+
+    return Promise.all([vendorCss, appCss, fontsTasks]);
 }
 
 function generateBundles(done) {
     const jspmBundles = Promise.all([
-        jspm.bundle("vendor", "wwwroot/bundles/vendor-bundle.js"),
-        jspm.bundle("app - vendor - jquery", "wwwroot/bundles/app-bundle.js")
+        gulp.src("wwwroot/bundles/*.js").pipe(clean()),
+        jspm.bundle("vendor - jquery", "wwwroot/bundles/vendor-bundle.js", { minify: true }),
+        jspm.bundle("app - vendor - jquery", "wwwroot/bundles/app-bundle.js", { minify: true })
     ]);
 
     return jspmBundles.then(() => {
@@ -64,8 +71,12 @@ function generateBundles(done) {
 //        sourceDir: __dirname + '/public/js'
 //    }))
 //    .pipe(gulp.dest('.'));
-export const js = gulp.series([cleanBundles, restoreLibraries, generateBundles]);
+export const js = generateBundles;
 
-export default function (done) {
-    done();
+export function copySystemJS() {
+    return gulp.src(["wwwroot/jspm_packages/system.js"])
+        .pipe(gulp.dest("wwwroot/vendor/"))
+        ;
 }
+
+export const releaseBuild = gulp.parallel([copySystemJS, js, css])

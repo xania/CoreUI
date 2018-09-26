@@ -1,10 +1,11 @@
 ﻿// ReSharper disable Html.EventNotResolved
-const PRECACHE = 'precache-v1';
-const RUNTIME = 'runtime';
+const PRECACHE = 'precache-v1.0';
+const RUNTIME = 'runtime-v1.0';
 
 // A list of local resources we always want to be cached.
 const PRECACHE_URLS = [
-    'css/xania.min.css'
+    'css/xania.css',
+    'vendor/css/all.css'
 ];
 
 let sw = self as any as ServiceWorkerGlobalScope;

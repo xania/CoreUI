@@ -11,18 +11,21 @@ export function message(text: string) {
 
 export function intro() {
     let view$ = Rx.interval(100).pipe(
-        Ro.startWith(1),
+        Ro.startWith("..."),
         Ro.map(x => <div>{x}</div>)
     );
 
     return (
         <div className="flex-columns-container">
-            intro
+            <h1>tiles</h1>
             <a href="/log">log</a>
             <a href="/test/ff">test ff</a>
             <a href="/test/dd">test dd</a>
             <a href="/test/dd/gg">test dd gg</a>
-            { await(view$) }
+            {awaitView(view$)}
+            <div>
+                <input type="file" accept="image/*" capture="capture" />
+            </div>
         </div>
     );
 }
@@ -52,13 +55,13 @@ export class Await extends React.Component<AwaitProps> {
     render() {
         return (
             <div>
-                { this.state.view }
+                {this.state.view}
             </div>
         );
     }
 }
 
-export function await(view$: Rx.Observable<JSX.Element>) {
+export function awaitView(view$: Rx.Observable<JSX.Element>) {
     return <Await>{view$}</Await>;
 }
 
