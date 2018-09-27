@@ -12,14 +12,14 @@ export function run(main: HTMLElement) {
     }
 
     var router = new Router(
-        main,
         new ReactViewResult(views.section("Intro", views.intro()))
             .route("test", () => views.section("Test", views.message("test 2")))
-        ,
-        toast
     );
 
-    router.start();
+    router.start().subscribe((routeResult) => {
+        routeResult.render({ container: main, router, toast });
+        console.log("o yeah:", routeResult);
+    });
 
     main.addEventListener("click", function (event) {
         if (event.target && event.target['pathname']) {

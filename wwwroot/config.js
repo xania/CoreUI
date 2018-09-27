@@ -96,6 +96,10 @@ System.config({
       "perfect-scrollbar": "npm:perfect-scrollbar@1.4.0",
       "popper.js": "npm:popper.js@1.14.4"
     },
+    "npm:@types/react@16.4.14": {
+      "@types/prop-types": "npm:@types/prop-types@15.5.6",
+      "csstype": "npm:csstype@2.5.7"
+    },
     "npm:asn1.js@4.10.1": {
       "bn.js": "npm:bn.js@4.11.8",
       "buffer": "github:jspm/nodelibs-buffer@0.1.1",

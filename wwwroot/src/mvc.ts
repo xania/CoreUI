@@ -12,7 +12,12 @@ declare type Value<T> = T | Rx.Observable<T> | Rx.InteropObservable<T> | Promise
 declare type ActionFunc = ((context: IActionContext) => IActionResult | Value<View> | void);
 
 export interface IActionContext {
-    container: Element;
+    router: Router;
+    params?: { [key: string]: any };
+}
+
+export interface IRenderContext {
+    container: Element,
     router: Router;
     params?: { [key: string]: any };
     toast: Toast;
@@ -53,7 +58,7 @@ interface IAction {
 }
 
 export interface IActionResult {
-    render(context: IActionContext): RenderResult | void;
+    render(context: IRenderContext): RenderResult | void;
     routes: Routes;
 }
 
@@ -97,7 +102,7 @@ abstract class ActionResultBase implements IActionResult {
 export class ReactViewResult extends ActionResultBase {
     constructor(public view: Value<View>) { super(); }
 
-    render(context: IActionContext): RenderResult {
+    render(context: IRenderContext): RenderResult {
         const { container } = context;
         const node = document.createElement("section");
         node.className = "panel";
@@ -167,7 +172,7 @@ class NotFoundResult implements IActionResult {
         return new RouteAction(() => new EmptyResult());
     }
 
-    render(context: IActionContext) {
+    render(context: IRenderContext) {
         const message = `Path not found: ${this.path.join("/")}`;
         context && context.toast.error(message);
     }
@@ -191,7 +196,7 @@ export class ErrorResult implements IActionResult {
 
     }
 
-    render(context: IActionContext) {
+    render(context: IRenderContext) {
         console.error(this.err);
         context.toast.error(this.err.message);
     }
@@ -199,8 +204,9 @@ export class ErrorResult implements IActionResult {
 
 class RouteResult {
     private _next: RouteResult = null;
+    private renderResult: RenderResult | void = null;
 
-    constructor(public path, public value: IActionResult, public renderResult: RenderResult | void) { }
+    constructor(public route: Route, public value: IActionResult) { }
 
     set next(value: RouteResult) {
         this._next && this._next.dispose();
@@ -218,6 +224,11 @@ class RouteResult {
                 renderResult.disposable.dispose();
         }
     }
+
+    render(renderContext: IRenderContext) {
+        if (!this.renderResult)
+            this.renderResult = this.value.render(renderContext);
+    }
 }
 
 type RouteEntry = {
@@ -231,12 +242,25 @@ interface Toast {
 
 export type Route = any[];
 
+function arrayCompare(xv: any[], yv: any[]) {
+    if (xv.length !== yv.length)
+        return false;
+
+    let i = xv.length;
+    while (i--) {
+        if (xv[i] !== yv[i])
+            return false;
+    }
+
+    return true;
+}
+
 export class Router {
 
     private actions$: Rx.Observable<Route>;
     private active$: Rx.Subject<Route>;
 
-    constructor(public container: Element, public root: Value<IActionResult>, public toast: Toast) {
+    constructor(public root: Value<IActionResult>) {
         var passive$ = Rx.timer(0, 50).pipe(
             Ro.map(() => location.pathname),
             Ro.distinctUntilChanged(),
@@ -247,28 +271,12 @@ export class Router {
 
         this.actions$ =
             Rx.merge(passive$, this.active$)
-                .pipe(
-                    Ro.distinctUntilChanged((xv: any[], yv: any[]) => {
-                        if (xv.length !== yv.length)
-                            return false;
-
-                        let i = xv.length;
-                        while (i--) {
-                            if (xv[i] !== yv[i])
-                                return false;
-                        }
-
-                        return true;
-                    }),
-                    Ro.tap(log("action"))
-                );
+                .pipe(Ro.distinctUntilChanged(arrayCompare));
     }
 
     start() {
         const actionContext: IActionContext = {
-            container: this.container,
-            router: this,
-            toast: this.toast
+            router: this
         };
 
         function map<T, U>(value: Value<T>, project: (t: T) => U): Rx.Observable<U> {
@@ -288,8 +296,8 @@ export class Router {
             const resolution = parent.value.routes.resolve(route);
             if (resolution) {
                 let next = parent.next;
-                let path = resolution.partial.join("/");
-                if (next && next.path === path) {
+                let partialRoute = resolution.partial;
+                if (next && arrayCompare(next.route, partialRoute)) {
                     return Rx.of(<RouteEntry>{
                         parent: next,
                         route: resolution.tail,
@@ -300,7 +308,7 @@ export class Router {
                     resolution.action.execute({ ...actionContext, params: resolution.params || {} }),
                     actionResult => {
                         parent.next =
-                            new RouteResult(path, actionResult, actionResult.render(actionContext));
+                            new RouteResult(partialRoute, actionResult);
 
                         return <RouteEntry>{
                             parent: parent.next,
@@ -309,26 +317,25 @@ export class Router {
                     });
             }
 
-            const notFound = new NotFoundResult(route);
-            parent.next = new RouteResult(route, new NotFoundResult(route), notFound.render(actionContext));
+            parent.next = new RouteResult(route, new NotFoundResult(route));
             return Rx.of(<RouteEntry>{
                 parent: parent.next,
                 route: []
             });
         }
 
-        valueToObservable(this.root)
+        return valueToObservable(this.root)
             .pipe(
-                Ro.map(root => new RouteResult("", root, root.render(actionContext))),
+                Ro.map(root => new RouteResult([], root)),
                 Ro.reduce((acc, value: RouteResult) => {
                     acc.dispose();
                     console.log("root element is disposed!", acc);
                     return value;
                 }),
-                Ro.combineLatest(this.actions$, (rootResult, route) => <RouteEntry>{ route, parent: rootResult }),
-                Ro.tap(log("latest")),
-                Ro.expand(resolveRoute)
-            ).subscribe((entry: RouteEntry) => console.log(entry));
+                Ro.combineLatest(this.actions$, (rootResult, route) => <RouteEntry>{ parent: rootResult, route }),
+                Ro.expand(resolveRoute),
+                Ro.map(e => e.parent)
+            );
     }
 
     public action = (route: string | Route) => {
@@ -339,16 +346,6 @@ export class Router {
         } else {
             window.history.pushState(null, null, `/${route.join("/")}`);
             this.active$.next(route);
-        }
-    }
-
-    public parent = () => {
-        var i = location.pathname.lastIndexOf('/');
-        if (i >= 0) {
-            var parentPath = location.pathname.substr(0, i);
-            window.history.pushState(null, parentPath, "/" + parentPath);
-        } else {
-            this.toast.error('no parent');
         }
     }
 }

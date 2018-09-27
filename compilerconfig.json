@@ -4,10 +4,6 @@
     "inputFile": "wwwroot/css/xania.less"
   },
   {
-    "outputFile": "wwwroot/css/vendor.css",
-    "inputFile": "wwwroot/css/vendor.less"
-  },
-  {
     "outputFile": "wwwroot/vendor/css/all.css",
     "inputFile": "wwwroot/vendor/css/all.less"
   }
