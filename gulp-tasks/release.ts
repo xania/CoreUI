@@ -5,6 +5,7 @@ const cleanCss = require("gulp-clean-css");
 import * as jspm from "jspm";
 import * as hash from "gulp-hash";
 import * as clean from "gulp-clean";
+import * as watch from 'gulp-watch';
 
 //var ts = require("gulp-typescript");
 
@@ -20,18 +21,29 @@ import * as clean from "gulp-clean";
 //        .js.pipe(gulp.dest(folder));
 //}
 
-export function css(done) {
-    let appCss = gulp
-        .src(["wwwroot/css/xania.less"])
+gulp.task("css:app:watch", function () {
+    return watch(["wwwroot/css/*.less"], { ignoreInitial: false }, gulp.parallel( [cssAppClean, cssApp] ));
+});
+
+function cssAppClean() {
+    return gulp
+        .src(['wwwroot/css/*.css'])
+        .pipe(clean())
+}
+
+function cssApp() {
+    return gulp.src(["wwwroot/css/xania.less"])
         // .pipe(sourcemaps.init({ loadMaps: true }))
         .pipe(less())
-        .pipe(cleanCss())
+        // .pipe(cleanCss())
         // .pipe(sourcemaps.write({ includeContent: false, addComment: false, sourceRoot: '/css' }))
         .pipe(gulp.dest("wwwroot/css"))
         ;
+}
 
-    let vendorCss = gulp
-        .src(["wwwroot/vendor/css/all.less"])
+export function css(done) {
+
+    let vendorCss = gulp.src(["wwwroot/vendor/css/all.less"])
         // .pipe(sourcemaps.init({ loadMaps: true }))
         .pipe(less())
         .pipe(cleanCss())
@@ -44,7 +56,7 @@ export function css(done) {
         .pipe(gulp.dest("wwwroot/vendor/fonts/"))
         ;
 
-    return Promise.all([vendorCss, appCss, fontsTasks]);
+    return Promise.all([vendorCss, cssApp, fontsTasks]);
 }
 
 function generateBundles(done) {

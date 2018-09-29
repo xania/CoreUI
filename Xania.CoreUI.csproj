@@ -16,8 +16,6 @@
   <ItemGroup>
     <Content Remove="package-lock.json" />
     <TypeScriptCompile Include="wwwroot\src\**\*.ts" />
-    <Content Remove="wwwroot\src\**\*.ts" />
-    <Content Remove="wwwroot\src\**\*.tsx" />
     <Content Update="**\tsconfig.json" CopyToPublishDirectory="never" />
   </ItemGroup>
 
@@ -38,6 +36,10 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\bundles\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="wwwroot\src\controllers\test.tsx" />
   </ItemGroup>
 
 </Project>

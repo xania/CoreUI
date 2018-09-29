@@ -1,6 +1,5 @@
 ﻿﻿import * as Rx from "rxjs";
 import * as Ro from "rxjs/operators";
-import { isErrorResult } from "./shared/data";
 import * as ReactDOM from "react-dom"
 import { isPromise } from 'rxjs/internal/util/isPromise';
 import { isInteropObservable } from 'rxjs/internal/util/isInteropObservable';
@@ -10,6 +9,8 @@ import { fromObservable } from 'rxjs/internal/observable/fromObservable';
 declare type View = JSX.Element;
 declare type Value<T> = T | Rx.Observable<T> | Rx.InteropObservable<T> | PromiseLike<T>;
 declare type ActionFunc = ((context: IActionContext) => IActionResult | Value<View> | void);
+
+type Router = {};
 
 export interface IActionContext {
     router: Router;
@@ -112,16 +113,8 @@ export class ReactViewResult extends ActionResultBase {
                 return ReactDOM.render(view, node);
             },
             error(err) {
-                if (isErrorResult(err)) {
-                    if (err.type === "unauthorized") {
-                        alert("unauthorized");
-                    }
-                    else
-                        context.toast.error(err.payload());
-                } else {
-                    context.toast.error("unhandled error");
-                    console.error("unhandled error", err);
-                }
+                context.toast.error("unhandled error");
+                console.error("unhandled error", err);
             }
         });
         var d = {
@@ -157,9 +150,28 @@ export class RouteAction implements IAction {
     static create(action: IAction | ActionFunc | IActionResult) {
         return isAction(action)
             ? action
-            : typeof (action) === "function"
-                ? new RouteAction(action)
-                : new RouteAction(() => action);
+            : typeof action === "string" 
+                ? new ControllerAction(action, "index")
+                : typeof (action) === "function"
+                    ? new RouteAction(action)
+                    : new RouteAction(() => action);
+    }
+}
+
+export class ControllerAction implements IAction {
+    async execute(context: IActionContext) {
+        let module = await window["SystemJS"].import(this.module)
+        let action = module[this.action]
+        let result = action(context);
+
+        if (isActionResult(result))
+            return result;
+        else if (result) {
+            return new ReactViewResult(result);
+        }
+    }
+
+    constructor(public module: string, public action: string) {
     }
 }
 
@@ -255,12 +267,12 @@ function arrayCompare(xv: any[], yv: any[]) {
     return true;
 }
 
-export class Router {
+export class BrowserRouter {
 
     private actions$: Rx.Observable<Route>;
     private active$: Rx.Subject<Route>;
 
-    constructor(public root: Value<IActionResult>) {
+    constructor() {
         var passive$ = Rx.timer(0, 50).pipe(
             Ro.map(() => location.pathname),
             Ro.distinctUntilChanged(),
@@ -274,7 +286,7 @@ export class Router {
                 .pipe(Ro.distinctUntilChanged(arrayCompare));
     }
 
-    start() {
+    start(root: Value<IActionResult>) {
         const actionContext: IActionContext = {
             router: this
         };
@@ -306,7 +318,7 @@ export class Router {
 
                 return map(
                     resolution.action.execute({ ...actionContext, params: resolution.params || {} }),
-                    actionResult => {
+                    (actionResult: IActionResult) => {
                         parent.next =
                             new RouteResult(partialRoute, actionResult);
 
@@ -324,7 +336,7 @@ export class Router {
             });
         }
 
-        return valueToObservable(this.root)
+        return valueToObservable(root)
             .pipe(
                 Ro.map(root => new RouteResult([], root)),
                 Ro.reduce((acc, value: RouteResult) => {
@@ -350,7 +362,7 @@ export class Router {
     }
 }
 
-class RenderResult {
+export class RenderResult {
     constructor(public disposable: IDisposable, public actionResult: IActionResult) {
     }
 }
@@ -380,3 +392,4 @@ export function routeTemplate(route: string | Route) {
         }
     }
 }
+

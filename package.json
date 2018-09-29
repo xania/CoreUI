@@ -5,7 +5,9 @@
   "main": "index.js",
   "author": "Ibrahim",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "gulp-watch": "^5.0.1"
+  },
   "scripts": {
     "postinstall": "jspm install",
     "build": "tsc --project wwwroot && tsc --project gulp-tasks && tsc --project service-worker"
@@ -24,7 +26,7 @@
     "indent-string": "^3.2.0",
     "jquery": "^3.3.1",
     "jspm": "^0.16.53",
-    "less": "^3.0.4",
+    "less": "^3.8.1",
     "lighthouse": "^3.1.1",
     "popper": "^1.0.1",
     "source-map": "^0.7.3",

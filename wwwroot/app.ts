@@ -1,5 +1,5 @@
 ﻿import '@coreui/coreui';
-import { Router, ReactViewResult } from "./src/mvc";
+import { BrowserRouter, ReactViewResult, ControllerAction } from "./src/mvc/index";
 import * as views from "./src/shared/views";
 import iziToast from "./src/diagnostics/toast"
 
@@ -11,15 +11,14 @@ export function run(main: HTMLElement) {
         }
     }
 
-    var router = new Router(
-        new ReactViewResult(views.section("Intro", views.intro()))
-            .route("test", () => views.section("Test", views.message("test 2")))
-    );
+    let root = new ReactViewResult(views.section("Intro", views.intro()))
+        .route("test", new ControllerAction("/src/controllers/test", "index")); // () => 
 
-    router.start().subscribe((routeResult) => {
-        routeResult.render({ container: main, router, toast });
-        console.log("o yeah:", routeResult);
-    });
+    let router = new BrowserRouter();
+    router.start(root)
+        .subscribe((routeResult) => {
+            routeResult.render({ container: main, router, toast });
+        });
 
     main.addEventListener("click", function (event) {
         if (event.target && event.target['pathname']) {

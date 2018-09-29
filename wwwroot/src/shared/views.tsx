@@ -24,7 +24,7 @@ export function intro() {
             <a href="/test/dd/gg">test dd gg</a>
             {awaitView(view$)}
             <div>
-                <form action="/drive/file/test" encType="multipart/form-data"  method="POST">
+                <form action="/drive/file/test" encType="multipart/form-data" method="POST">
                     <input type="file" accept="image/*" name="files" capture="capture" />
                     <button type="submit">submit</button>
                 </form>
@@ -33,7 +33,7 @@ export function intro() {
     );
 }
 
-type AwaitProps = { children: Rx.Observable<JSX.Element> }
+type AwaitProps = { children: Rx.ObservableInput<JSX.Element> }
 export class Await extends React.Component<AwaitProps> {
 
     private subscription: Rx.Subscription;
@@ -47,7 +47,7 @@ export class Await extends React.Component<AwaitProps> {
     }
 
     componentDidMount(): void {
-        this.subscription = this.props.children.subscribe(view => this.setState({ view }));
+        this.subscription = Rx.from(this.props.children).subscribe(view => this.setState({ view }));
     }
 
     componentWillUnmount(): void {
@@ -64,7 +64,7 @@ export class Await extends React.Component<AwaitProps> {
     }
 }
 
-export function awaitView(view$: Rx.Observable<JSX.Element>) {
+export function awaitView(view$: Rx.ObservableInput<JSX.Element>) {
     return <Await>{view$}</Await>;
 }
 
@@ -106,13 +106,11 @@ export function section(header: string | JSX.Element, main: JSX.Element) {
 function sectionHeader(title: string) {
     return (
         <header>
-            <a href="/" className="btn btn-left btn-default" style={{ flexGrow: 1 }}>
-                <span className="cui-chevron-left"></span> Terug
-            </a>
-            <div className="flex-rows-container">
-                <div style={{ flexGrow: 1 }}>
-                    <h3>{title}</h3>
-                </div>
+            <div style={{ flexGrow: 1 }}>
+                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <h3>{title}</h3>
             </div>
         </header>
     );

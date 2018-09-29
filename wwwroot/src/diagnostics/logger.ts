@@ -2,7 +2,7 @@
 import * as Rx from 'rxjs'
 import { map, startWith } from 'rxjs/operators'
 import { create, IClientError } from "./view"
-import { ReactViewResult } from "../mvc"
+import { ReactViewResult } from "../mvc/index"
 import * as views from "../shared/views"
 
 export function info(message: string) {
@@ -64,7 +64,7 @@ export function ddView() {
     return views.section("dd", views.message("dd"));
 }
 
-if (window.navigator.onLine) {
+if (window.navigator.onLine && false) {
     const connection = new signalR.HubConnectionBuilder()
         .withUrl("/loggerHub")
         .build();
