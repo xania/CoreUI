@@ -1,11 +1,12 @@
 ﻿// ReSharper disable Html.EventNotResolved
-const PRECACHE = 'precache-v1.0';
-const RUNTIME = 'runtime-v1.0';
+const version = "1.6";
+const PRECACHE = `precache-${version}`;
+const RUNTIME = `runtime-${version}`;
 
 // A list of local resources we always want to be cached.
 const PRECACHE_URLS = [
-    'css/xania.css',
-    'vendor/css/all.css'
+    // 'css/xania.css',
+    // 'vendor/css/all.css'
 ];
 
 let sw = self as any as ServiceWorkerGlobalScope;
@@ -40,7 +41,7 @@ self.addEventListener("fetch", (event: FetchEvent) => {
         const responsePromise =
             caches.match(event.request).then(async cachedResponse => {
                 if (cachedResponse) {
-                    return cachedResponse;
+                    // return cachedResponse;
                 }
 
                 let networkResponse = await fetch(event.request);

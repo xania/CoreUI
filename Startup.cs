@@ -70,19 +70,18 @@ namespace Xania.CoreUI
             {
                 app.UseExceptionHandler("/Error");
                 app.UseHsts();
+                app.UseHttpsRedirection();
             }
 
-            app.UseHttpsRedirection();
             app.UseStaticFiles(new StaticFileOptions
             {
                 // accept request to *.tsx static files
                 ServeUnknownFileTypes = true,
                 DefaultContentType = "text/plain"
             });
+
             app.UseCookiePolicy();
-
             app.UseAuthentication();
-
             app.UseSignalR(routes =>
             {
                 routes.MapHub<LoggerHub>("/loggerHub");

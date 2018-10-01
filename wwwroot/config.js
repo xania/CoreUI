@@ -15,6 +15,7 @@ System.config({
     "@coreui/icons": "npm:@coreui/icons@0.3.0",
     "@types/react": "npm:@types/react@16.4.14",
     "@types/react-dom": "npm:@types/react-dom@16.0.7",
+    "inobounce": "npm:inobounce@0.1.6",
     "izitoast": "npm:izitoast@1.4.0",
     "jquery": "npm:jquery@3.3.1",
     "react": "npm:react@16.5.2",

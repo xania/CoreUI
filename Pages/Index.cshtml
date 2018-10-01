@@ -10,8 +10,8 @@
     </div>
 </section>
 
-<environment exclude="Development">
-    @section head {
+@section head {
+    <environment include="Development">
         <script type="text/javascript">
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('/service-worker.js')
@@ -25,5 +25,5 @@
                     });
             }
         </script>
-    }
-</environment>
+    </environment>
+}

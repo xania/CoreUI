@@ -107,9 +107,9 @@ function sectionHeader(title: string) {
     return (
         <header>
             <div style={{ flexGrow: 1 }}>
-                <button type="button" className="close" data-dismiss="modal" aria-label="Close">
+                <a href="/" className="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">×</span>
-                </button>
+                </a>
                 <h3>{title}</h3>
             </div>
         </header>

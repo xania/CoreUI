@@ -17,9 +17,16 @@ private IEnumerable<string> GetBundles()
     <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
     <meta name="Description" content="Author: I. ben Salah,
         Modern Web Platform, Progressive Web App, React">
-    <meta name="theme-color" content="#db5945" />
+    <meta name="theme-color" content="#2196f3" />
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Xania">
+    <meta name="apple-mobile-web-app-status-bar-style" content="blue">
+    <meta name="apple-mobile-web-app-title" content="Xania Software">
+
     <title>Xania</title>
     <link rel="manifest" href="~/pwa/manifest.json">
+    <link rel="apple-touch-icon" sizes="180x180" href="~/images/brand/xania-icon.png">
     <link href="~/vendor/css/all.css" rel="stylesheet" />
     <link href="~/css/xania.css" rel="stylesheet" />
     @RenderSection("head", required: false)
@@ -37,7 +44,7 @@ private IEnumerable<string> GetBundles()
             <!-- Aside menu content here -->
         </aside>
     </div>
-    
+
     <environment exclude="Development">
         <script src="~/vendor/system.js"></script>
     </environment>
@@ -45,19 +52,22 @@ private IEnumerable<string> GetBundles()
         <script src="~/jspm_packages/system.js"></script>
     </environment>
     @*<script>
-        var systemLocate = System.locate;
-        var time = new Date().getTime();
-        System.locate = function (load) {
-            return Promise.resolve(systemLocate.call(this, load)).then(function (address) {
-                return address + '?' + time;
-            });
-        }
-    </script>*@
+            var systemLocate = System.locate;
+            var time = new Date().getTime();
+            System.locate = function (load) {
+                return Promise.resolve(systemLocate.call(this, load)).then(function (address) {
+                    return address + '?' + time;
+                });
+            }
+        </script>*@
     <script src="~/config.js"></script>
-    @foreach (var p in GetBundles()) { <script src="@p"></script> }
+    @foreach (var p in GetBundles())
+    {
+        <script src="@p"></script>}
     @RenderSection("Scripts", required: false)
 
     <partial name="_Templates" />
+    @*<script src="~/jspm_packages/npm/inobounce@0.1.6/inobounce.min.js"></script>*@
     <script>
         System.import("/app").then(function (app) {
             var main = window.document.body.querySelector("main");

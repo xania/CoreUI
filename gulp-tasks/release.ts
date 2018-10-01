@@ -35,7 +35,7 @@ function cssApp() {
     return gulp.src(["wwwroot/css/xania.less"])
         // .pipe(sourcemaps.init({ loadMaps: true }))
         .pipe(less())
-        // .pipe(cleanCss())
+        .pipe(cleanCss())
         // .pipe(sourcemaps.write({ includeContent: false, addComment: false, sourceRoot: '/css' }))
         .pipe(gulp.dest("wwwroot/css"))
         ;
