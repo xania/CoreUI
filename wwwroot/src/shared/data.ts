@@ -28,7 +28,7 @@ const tryFetchDefaults = {
     }
 }
 
-export function tryFetch<T>(url: string, init?: RequestInit): PromiseLike<T | ErrorResult> {
+export function tryFetch<T>(url: string, init?: RequestInit): PromiseLike<T> {
     const config = Object.assign(tryFetchDefaults, init);
 
     return fetch(url, config).then(response => {
