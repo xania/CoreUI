@@ -62,8 +62,8 @@ export function css(done) {
 function generateBundles(done) {
     const jspmBundles = Promise.all([
         gulp.src("wwwroot/bundles/*.js").pipe(clean()),
-        jspm.bundle("vendor - jquery", "wwwroot/bundles/vendor-bundle.js", { minify: true }),
-        jspm.bundle("app - vendor - jquery", "wwwroot/bundles/app-bundle.js", { minify: true })
+        jspm.bundle("vendor", "wwwroot/bundles/vendor-bundle.js", { minify: true }),
+        jspm.bundle("app - vendor", "wwwroot/bundles/app-bundle.js", { minify: true })
     ]);
 
     return jspmBundles.then(() => {
